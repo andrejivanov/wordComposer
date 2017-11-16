@@ -1,17 +1,13 @@
 package de.ai.kata;
 
-import lombok.extern.slf4j.Slf4j;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toSet;
 
-@Slf4j
 class SimpleOptimizedComposer implements Composer {
 
     @Override
@@ -22,22 +18,22 @@ class SimpleOptimizedComposer implements Composer {
     @Override
     public List<String> compose(List<String> words) {
 
-        Set<String> wordsWithSixChars = words.stream()
+        Set<String> wordsWithSixChars = words.parallelStream()
                 .filter(word -> word.length() == 6).collect(toSet());
-        TreeSet<String> wordsShorterSixChars = words.stream()
+        Set<String> wordsShorterSixChars = words.parallelStream()
                 .filter(word -> word.length() <= 6 && !word.isEmpty())
-                .collect(Collectors.toCollection(TreeSet::new));
+                .collect(Collectors.toSet());
 
-        return wordsWithSixChars.stream()
-                .flatMap(word -> searchWordCompositons(word, wordsShorterSixChars).stream())
+        return wordsWithSixChars.parallelStream()
+                .flatMap(word -> searchWordCompositons(word, wordsShorterSixChars).parallelStream())
                 .collect(Collectors.toList());
     }
 
-    private List<String> searchWordCompositons(String sixCharsWord, TreeSet<String> potentialComponents) {
+    private List<String> searchWordCompositons(String sixCharsWord, Set<String> potentialComponents) {
 
         Predicate<String> sameFirstChar = word -> word.charAt(0) == sixCharsWord.charAt(0);
 
-        return potentialComponents.stream()
+        return potentialComponents.parallelStream()
                 .filter(sameFirstChar)
                 .map(firstWord -> searchForSecondWord(sixCharsWord, firstWord, potentialComponents))
                 .filter(Optional::isPresent)
@@ -45,16 +41,16 @@ class SimpleOptimizedComposer implements Composer {
                 .collect(Collectors.toList());
     }
 
-    private Optional<String> searchForSecondWord(String word, String firstPart, TreeSet<String> potentialComponents) {
+    private Optional<String> searchForSecondWord(String word, String firstPart, Set<String> potentialComponents) {
 
         Predicate<String> sameStartCharAndEqualsRestCharCount = secondPart ->
                 secondPart.length() == word.length() - firstPart.length()
                         && secondPart.charAt(0) == word.charAt(firstPart.length());
 
-        return potentialComponents.stream()
+        return potentialComponents.parallelStream()
                 .filter(sameStartCharAndEqualsRestCharCount)
                 .filter(secondPart -> word.equals(firstPart + secondPart))
-                .map(foundSecondPart -> firstPart + " + " + foundSecondPart + " = " + word)
+                .map(foundSecondPart -> firstPart + " + " + foundSecondPart + " => " + word)
                 .findFirst();
     }
 }

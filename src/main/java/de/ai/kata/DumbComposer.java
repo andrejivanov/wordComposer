@@ -1,18 +1,15 @@
 package de.ai.kata;
 
-import lombok.extern.slf4j.Slf4j;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 
-@Slf4j
 class DumbComposer implements Composer {
 
     @Override
     public String description() {
-        return "strait forward implementation of composer";
+        return "strait forward implementation of composer, triple loop, very slow";
     }
 
     public List<String> compose(List<String> words) {
@@ -24,7 +21,7 @@ class DumbComposer implements Composer {
                         firstWord -> words.forEach(
                                 secondWord -> {
                                     if (sixCharsWord.equals(firstWord + secondWord)) {
-                                        results.add(firstWord + " + " + secondWord + " = " + sixCharsWord);
+                                        results.add(firstWord + " + " + secondWord + " => " + sixCharsWord);
                                     }
                                 }
                         )
